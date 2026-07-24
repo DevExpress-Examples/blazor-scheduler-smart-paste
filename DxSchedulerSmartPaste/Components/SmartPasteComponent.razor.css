@@ -1,0 +1,7 @@
+#smart-paste {
+    padding: 0 1rem 1rem 1rem;
+}
+
+::deep .smart-paste-btn {
+    margin-top: 0.6rem;
+}
