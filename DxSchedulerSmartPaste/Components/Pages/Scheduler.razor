@@ -1,0 +1,69 @@
+﻿@page "/"
+
+<PageTitle>Blazor Scheduler - AI Smart Paste</PageTitle>
+
+<DxScheduler @ref="scheduler"
+             DataStorage="@DataStorage"
+             StartDate="@StartDate"
+             ActiveViewType="SchedulerViewType.WorkWeek"
+             AppointmentFormShowing="OnAppointmentFormShowing">
+
+    <AppointmentFormLayout Context="formInfo">
+        <SmartPasteComponent AppointmentFormInfo="@((CustomAppointmentFormInfo)formInfo)" />
+
+        <DxSchedulerSubjectFormLayoutItem />
+        <DxSchedulerStartDateFormLayoutItem />
+        <DxSchedulerStartTimeFormLayoutItem />
+        <DxSchedulerAllDayFormLayoutItem />
+        <DxSchedulerEndDateFormLayoutItem />
+        <DxSchedulerEndTimeFormLayoutItem />
+        <DxSchedulerLocationFormLayoutItem />
+        <DxSchedulerDescriptionFormLayoutItem />
+    </AppointmentFormLayout>
+
+    <Views>
+        <DxSchedulerWorkWeekView VisibleTime="@(new DxSchedulerTimeSpanRange(TimeSpan.FromHours(8), TimeSpan.FromHours(19)))" />
+    </Views>
+</DxScheduler>
+
+@code {
+    DxScheduler scheduler = default!;
+    DateTime StartDate { get; set; } = DateTime.Today;
+    DxSchedulerDataStorage DataStorage { get; set; } = default!;
+
+    protected override void OnInitialized()
+    {
+        var appointments = new List<Appointment>
+        {
+            new()
+            {
+                Id = 1,
+                Subject = "Initial call",
+                Start = DateTime.Today.AddHours(9),
+                End = DateTime.Today.AddHours(10),
+                Location = "Building 2, Room 104",
+                Description = "Project meeting with the platform team."
+            }
+        };
+
+        DataStorage = new DxSchedulerDataStorage
+        {
+            AppointmentsSource = appointments,
+            AppointmentMappings = new DxSchedulerAppointmentMappings
+            {
+                Id = nameof(Appointment.Id),
+                Subject = nameof(Appointment.Subject),
+                Start = nameof(Appointment.Start),
+                End = nameof(Appointment.End),
+                Location = nameof(Appointment.Location),
+                Description = nameof(Appointment.Description),
+                AllDay = nameof(Appointment.AllDay)
+            }
+        };
+    }
+
+    void OnAppointmentFormShowing(SchedulerAppointmentFormEventArgs args)
+    {
+        args.FormInfo = new CustomAppointmentFormInfo(args.Appointment, DataStorage, scheduler);
+    }
+}

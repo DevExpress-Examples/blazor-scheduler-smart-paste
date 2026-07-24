@@ -1,0 +1,128 @@
+﻿@using System.Globalization
+@using DevExpress.AIIntegration.Blazor
+@using DevExpress.Blazor
+@using Microsoft.AspNetCore.Components
+@using DxSchedulerSmartPaste.Models
+@using DevExpress.Images.Blazor
+@inherits SmartPasteBase
+
+<div id="smart-paste">
+    <DxLoadingPanel Visible="@IsProcessing" PositionTarget=".dxbl-apt-edit-dialog-container" ApplyBackgroundShading="true" />
+
+    <div>Sample Source Text:</div>
+    <DxMemo @bind-Text="SourceText"
+            Rows="8"
+            Columns="120"
+            ResizeMode="MemoResizeMode.Auto" />
+
+    <DxButton Text="Smart Paste"
+              IconUrl="@Icon.Sparkle"
+              RenderStyle="ButtonRenderStyle.Primary"
+              Click="OnSmartPasteClick"
+              CssClass="smart-paste-btn" />
+</div>
+
+@code {
+    [Parameter]
+    public CustomAppointmentFormInfo? AppointmentFormInfo { get; set; }
+
+    protected string SourceText { get; set; } = "Hi,\n\nI'm confirming our Q4 Strategy Review on July 28, 2026. We will discuss about the proposed strategy points shared by our executives yesterday. We'll meet from 2:00 PM to 3:30 PM in Building 4, Room 204.\n\nThanks,\nJohn";
+
+    protected bool IsProcessing { get; set; } = false;
+
+    static readonly Dictionary<string, string> FieldDescriptions = new()
+    {
+        { nameof(CustomAppointmentFormInfo.Subject), "Short appointment title." },
+        { nameof(CustomAppointmentFormInfo.Start), "Start date and time, (yyyy-MM-ddTHH:mm:ss)." },
+        { nameof(CustomAppointmentFormInfo.End), "End date and time, (yyyy-MM-ddTHH:mm:ss)." },
+        { nameof(CustomAppointmentFormInfo.Location), "Physical or virtual meeting location." },
+        { nameof(CustomAppointmentFormInfo.Description), "Summarized body of the appointment." }
+    };
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        PromptAugmentation = "Always override the current field value with the extracted one. If a value cannot be determined, leave the field unchanged.";
+        ItemDescriptions = FieldDescriptions;
+    }
+
+    protected override object? GetDataObject() => AppointmentFormInfo;
+    protected override string GetTargetElementId() => "smart-paste";
+
+    protected override IEnumerable<SmartPasteFieldInfo> GetSmartPasteFieldInfos(object data)
+    {
+        if (data is not CustomAppointmentFormInfo info)
+            yield break;
+
+        yield return new SmartPasteFieldInfo(nameof(info.Subject), typeof(string), info.Subject);
+        yield return new SmartPasteFieldInfo(nameof(info.Start), typeof(DateTime), info.Start);
+        yield return new SmartPasteFieldInfo(nameof(info.End), typeof(DateTime), info.End);
+        yield return new SmartPasteFieldInfo(nameof(info.Location), typeof(string), info.Location);
+        yield return new SmartPasteFieldInfo(nameof(info.Description), typeof(string), info.Description);
+    }
+
+    protected override bool SetFieldValue(object data, string fieldName, object? value, out object? convertedValue)
+    {
+        var info = (CustomAppointmentFormInfo)data!;
+        convertedValue = null;
+
+        switch (fieldName)
+        {
+            case nameof(info.Subject):
+                var subjectStr = value as string ?? Convert.ToString(value ?? string.Empty);
+                info.Subject = subjectStr;
+                convertedValue = subjectStr;
+                return true;
+
+            case nameof(info.Start):
+                var startDt = ToDateTime(value, info.Start);
+                info.Start = startDt;
+                convertedValue = startDt;
+                return true;
+
+            case nameof(info.End):
+                var endDt = ToDateTime(value, info.End);
+                if (endDt < info.Start) endDt = info.Start;
+                info.End = endDt;
+                convertedValue = endDt;
+                return true;
+
+            case nameof(info.Location):
+                var locStr = value as string ?? Convert.ToString(value ?? string.Empty);
+                info.Location = locStr;
+                convertedValue = locStr;
+                return true;
+
+            case nameof(info.Description):
+                var descStr = value as string ?? Convert.ToString(value ?? string.Empty);
+                info.Description = descStr;
+                convertedValue = descStr;
+                return true;
+        }
+        return false;
+    }
+
+    protected override Task OnValuesApplied(IList<KeyValuePair<string, object?>> appliedValues)
+    {
+        IsProcessing = false;
+        return Task.CompletedTask;
+    }
+
+    protected async Task OnSmartPasteClick()
+    {
+        if (string.IsNullOrWhiteSpace(SourceText)) return;
+
+        IsProcessing = true;
+        await SmartPasteAsync(SourceText);
+    }
+
+    static DateTime ToDateTime(object? value, DateTime fallback) =>
+        value switch
+        {
+            null => fallback,
+            DateTime dt => dt,
+            DateTimeOffset dto => dto.DateTime,
+            string s when DateTime.TryParse(s, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var parsed) => parsed,
+            _ => fallback
+        };
+}
