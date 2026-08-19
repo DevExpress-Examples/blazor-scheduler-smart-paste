@@ -1,23 +1,16 @@
 .scheduler-page {
     display: flex;
-    align-items: stretch;
+    align-items: flex-start;
     gap: 1rem;
-    flex: 1 1 auto;
-    min-height: 0;
     width: 100%;
 }
 
 .source-text-panel {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.375rem;
     flex: 0 0 320px;
     min-width: 260px;
-    height: 100%;
-}
-
-.source-text-panel-title {
-    font-weight: var(--dxds-font-weight-title-strong, 700);
 }
 
 .source-text-panel-caption {
@@ -25,20 +18,8 @@
     font-size: var(--dxds-font-size-caption-md);
 }
 
-::deep .source-text-panel-memo {
-    flex: 1 1 auto;
-}
-
-    ::deep .source-text-panel-memo textarea {
-        height: 100% !important;
-    }
-
-.source-text-panel-copy-btn {
-    align-self: flex-start;
-}
-
 ::deep .scheduler-panel {
     flex: 1 1 auto;
     min-width: 0;
-    height: 100%;
+    height: 640px;
 }

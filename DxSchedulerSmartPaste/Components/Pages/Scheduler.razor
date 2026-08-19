@@ -6,18 +6,16 @@
 
 <div class="scheduler-page">
     <div class="source-text-panel">
-        <div class="source-text-panel-title">Sample Source Text</div>
         <div class="source-text-panel-caption">
-            Copy the text below to the clipboard, then open (or create) an appointment and click <strong>Smart Paste</strong> in the edit form.
+            <strong>Sample source text.</strong> Copy it to the clipboard, then open (or create) an appointment and click <strong>Smart Paste</strong> in the edit form.
         </div>
         <DxButton Text="Copy to Clipboard"
                   IconUrl="@Icon.ClipboardContent"
                   RenderStyle="ButtonRenderStyle.Secondary"
-                  Click="OnCopyToClipboardClick"
-                  CssClass="source-text-panel-copy-btn" />
+                  Click="OnCopyToClipboardClick" />
         <DxMemo @bind-Text="SourceText"
-                ResizeMode="MemoResizeMode.Auto"
-                CssClass="source-text-panel-memo" />
+                Rows="11"
+                ResizeMode="MemoResizeMode.Vertical" />
     </div>
 
     <DxScheduler @ref="scheduler"
@@ -26,6 +24,18 @@
                  StartDate="@StartDate"
                  ActiveViewType="SchedulerViewType.WorkWeek"
                  AppointmentFormShowing="OnAppointmentFormShowing">
+
+        <AppointmentCompactFormLayout Context="formInfo">
+            <DxSchedulerSubjectFormLayoutItem />
+            <DxSchedulerStartDateFormLayoutItem />
+            <DxSchedulerStartTimeFormLayoutItem />
+            <DxSchedulerAllDayFormLayoutItem />
+            <DxSchedulerEndDateFormLayoutItem />
+            <DxSchedulerEndTimeFormLayoutItem />
+            <DxSchedulerLocationFormLayoutItem />
+            <DxSchedulerDescriptionFormLayoutItem />
+            <SmartPasteComponent AppointmentFormInfo="@((CustomAppointmentFormInfo)formInfo)" />
+        </AppointmentCompactFormLayout>
 
         <AppointmentFormLayout Context="formInfo">
             <DxSchedulerSubjectFormLayoutItem />
