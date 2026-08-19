@@ -1,7 +1,9 @@
 #smart-paste {
-    padding: 0 1rem 1rem 1rem;
-}
-
-::deep .smart-paste-btn {
-    margin-top: 0.6rem;
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 6px 6px 0;
+    margin: 6px 0 0;
+    border-top: 1px solid var(--dxds-color-border-base-default-rest);
 }

@@ -4,29 +4,21 @@
 @using Microsoft.AspNetCore.Components
 @using DxSchedulerSmartPaste.Models
 @using DevExpress.Images.Blazor
+@inject IJSRuntime JS
 @inherits SmartPasteBase
 
 <div id="smart-paste">
     <DxLoadingPanel Visible="@IsProcessing" PositionTarget=".dxbl-apt-edit-dialog-container" ApplyBackgroundShading="true" />
 
-    <div>Sample Source Text:</div>
-    <DxMemo @bind-Text="SourceText"
-            Rows="8"
-            Columns="120"
-            ResizeMode="MemoResizeMode.Auto" />
-
     <DxButton Text="Smart Paste"
-              IconUrl="@Icon.Sparkle"
+              IconUrl="@Icon.ClipboardPasteSparkle"
               RenderStyle="ButtonRenderStyle.Primary"
-              Click="OnSmartPasteClick"
-              CssClass="smart-paste-btn" />
+              Click="OnSmartPasteClick" />
 </div>
 
 @code {
     [Parameter]
     public CustomAppointmentFormInfo? AppointmentFormInfo { get; set; }
-
-    protected string SourceText { get; set; } = "Hi,\nI confirm our Q4 Strategy Review on July 28, 2026.\nDuring the meeting, we will discuss the strategy proposals shared in yesterday's email.\nWe will meet from 2:00 PM to 3:30 PM in Building 4, Room 204.\n\nThanks,\nJohn";
 
     protected bool IsProcessing { get; set; } = false;
 
@@ -110,10 +102,20 @@
 
     protected async Task OnSmartPasteClick()
     {
-        if (string.IsNullOrWhiteSpace(SourceText)) return;
+        string? clipboardText = null;
+        try
+        {
+            clipboardText = await JS.InvokeAsync<string>("navigator.clipboard.readText");
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+
+        if (string.IsNullOrWhiteSpace(clipboardText)) return;
 
         IsProcessing = true;
-        await SmartPasteAsync(SourceText);
+        await SmartPasteAsync(clipboardText);
     }
 
     static DateTime ToDateTime(object? value, DateTime fallback) =>

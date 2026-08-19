@@ -1,35 +1,62 @@
 ﻿@page "/"
+@using DevExpress.Images.Blazor
+@inject IJSRuntime JS
 
 <PageTitle>Blazor Scheduler - AI Smart Paste</PageTitle>
 
-<DxScheduler @ref="scheduler"
-             DataStorage="@DataStorage"
-             StartDate="@StartDate"
-             ActiveViewType="SchedulerViewType.WorkWeek"
-             AppointmentFormShowing="OnAppointmentFormShowing">
+<div class="scheduler-page">
+    <div class="source-text-panel">
+        <div class="source-text-panel-title">Sample Source Text</div>
+        <div class="source-text-panel-caption">
+            Copy the text below to the clipboard, then open (or create) an appointment and click <strong>Smart Paste</strong> in the edit form.
+        </div>
+        <DxButton Text="Copy to Clipboard"
+                  IconUrl="@Icon.ClipboardContent"
+                  RenderStyle="ButtonRenderStyle.Secondary"
+                  Click="OnCopyToClipboardClick"
+                  CssClass="source-text-panel-copy-btn" />
+        <DxMemo @bind-Text="SourceText"
+                ResizeMode="MemoResizeMode.Auto"
+                CssClass="source-text-panel-memo" />
+    </div>
 
-    <AppointmentFormLayout Context="formInfo">
-        <SmartPasteComponent AppointmentFormInfo="@((CustomAppointmentFormInfo)formInfo)" />
+    <DxScheduler @ref="scheduler"
+                 CssClass="scheduler-panel"
+                 DataStorage="@DataStorage"
+                 StartDate="@StartDate"
+                 ActiveViewType="SchedulerViewType.WorkWeek"
+                 AppointmentFormShowing="OnAppointmentFormShowing">
 
-        <DxSchedulerSubjectFormLayoutItem />
-        <DxSchedulerStartDateFormLayoutItem />
-        <DxSchedulerStartTimeFormLayoutItem />
-        <DxSchedulerAllDayFormLayoutItem />
-        <DxSchedulerEndDateFormLayoutItem />
-        <DxSchedulerEndTimeFormLayoutItem />
-        <DxSchedulerLocationFormLayoutItem />
-        <DxSchedulerDescriptionFormLayoutItem />
-    </AppointmentFormLayout>
+        <AppointmentFormLayout Context="formInfo">
+            <DxSchedulerSubjectFormLayoutItem />
+            <DxSchedulerStartDateFormLayoutItem />
+            <DxSchedulerStartTimeFormLayoutItem />
+            <DxSchedulerAllDayFormLayoutItem />
+            <DxSchedulerEndDateFormLayoutItem />
+            <DxSchedulerEndTimeFormLayoutItem />
+            <DxSchedulerLocationFormLayoutItem />
+            <DxSchedulerDescriptionFormLayoutItem />
+            <SmartPasteComponent AppointmentFormInfo="@((CustomAppointmentFormInfo)formInfo)" />
+        </AppointmentFormLayout>
 
-    <Views>
-        <DxSchedulerWorkWeekView VisibleTime="@(new DxSchedulerTimeSpanRange(TimeSpan.FromHours(8), TimeSpan.FromHours(19)))" />
-    </Views>
-</DxScheduler>
+        <Views>
+            <DxSchedulerWorkWeekView VisibleTime="@(new DxSchedulerTimeSpanRange(TimeSpan.FromHours(8), TimeSpan.FromHours(19)))" />
+        </Views>
+    </DxScheduler>
+</div>
 
 @code {
     DxScheduler scheduler = default!;
-    DateTime StartDate { get; set; } = DateTime.Today;
+    DateTime StartDate { get; set; } = new(2026, 7, 27);
     DxSchedulerDataStorage DataStorage { get; set; } = default!;
+
+    string SourceText { get; set; } =
+        "Hi,\n\nI'm confirming our Q4 Strategy Review on July 28, 2026. We will discuss about the proposed strategy points shared by our executives yesterday. We'll meet from 2:00 PM to 3:30 PM in Building 4, Room 204.\n\nThanks,\nJohn";
+
+    async Task OnCopyToClipboardClick()
+    {
+        await JS.InvokeVoidAsync("navigator.clipboard.writeText", SourceText);
+    }
 
     protected override void OnInitialized()
     {
@@ -39,8 +66,8 @@
             {
                 Id = 1,
                 Subject = "Initial call",
-                Start = DateTime.Today.AddHours(9),
-                End = DateTime.Today.AddHours(10),
+                Start = StartDate.AddHours(9),
+                End = StartDate.AddHours(10),
                 Location = "Building 2, Room 104",
                 Description = "Project meeting with the platform team."
             }
