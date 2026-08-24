@@ -1,4 +1,4 @@
-﻿@using System.Globalization
+@using System.Globalization
 @using DevExpress.AIIntegration.Blazor
 @using DevExpress.Blazor
 @using Microsoft.AspNetCore.Components
@@ -8,8 +8,6 @@
 @inherits SmartPasteBase
 
 <div id="smart-paste">
-    <DxLoadingPanel Visible="@IsProcessing" PositionTarget=".dxbl-apt-edit-dialog-container" ApplyBackgroundShading="true" />
-
     <DxButton Text="Smart Paste"
               IconUrl="@Icon.ClipboardPasteSparkle"
               RenderStyle="ButtonRenderStyle.Primary"
@@ -20,7 +18,17 @@
     [Parameter]
     public CustomAppointmentFormInfo? AppointmentFormInfo { get; set; }
 
-    protected bool IsProcessing { get; set; } = false;
+    [Parameter]
+    public bool IsProcessing { get; set; } = false;
+
+    [Parameter]
+    public EventCallback<bool> IsProcessingChanged { get; set; }
+
+    async Task SetIsProcessing(bool value)
+    {
+        IsProcessing = value;
+        await IsProcessingChanged.InvokeAsync(value);
+    }
 
     static readonly Dictionary<string, string> FieldDescriptions = new()
     {
@@ -96,8 +104,7 @@
 
     protected override Task OnValuesApplied(IList<KeyValuePair<string, object?>> appliedValues)
     {
-        IsProcessing = false;
-        return Task.CompletedTask;
+        return SetIsProcessing(false);
     }
 
     protected async Task OnSmartPasteClick()
@@ -114,7 +121,7 @@
 
         if (string.IsNullOrWhiteSpace(clipboardText)) return;
 
-        IsProcessing = true;
+        await SetIsProcessing(true);
         await SmartPasteAsync(clipboardText);
     }
 
