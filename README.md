@@ -4,7 +4,7 @@ Automatically generated badges
 
 # Blazor Scheduler — AI-powered Smart Paste
 
-This example adds an AI-powered Smart Paste extension to the DevExpress Blazor [DxScheduler](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxScheduler) component. The appointment edit forms include Smart Paste buttons that simplify data entry when users copy appointment information from external sources to the clipboard. The Smart Paste extension then parses the clipboard text to fill a new appointment with details (a subject, start and end time values, location, and description).
+This example adds an AI-powered Smart Paste extension to the DevExpress Blazor [Scheduler](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxScheduler) component. Appointment edit forms include Smart Paste buttons that simplify data entry when users copy appointment information from external sources. The Smart Paste extension then parses the clipboard text to fill a new appointment with details (a subject, start and end time values, location, and description).
 
 ![Scheduler Smart Paste](scheduler-smart-paste.png)
 
@@ -14,37 +14,37 @@ This example adds an AI-powered Smart Paste extension to the DevExpress Blazor [
 
 1. The application uses the Azure OpenAI service as the AI provider. Configure the Azure OpenAI endpoint, API key, and deployment name in `appsettings.json`:
 
-```json
-"AzureOpenAISettings": {
-    "Endpoint": "your_endpoint",
-    "Key": "your_key",
-    "DeploymentName": "your_deployment_name"
-  }
-```
+    ```json
+    "AzureOpenAISettings": {
+        "Endpoint": "your_endpoint",
+        "Key": "your_key",
+        "DeploymentName": "your_deployment_name"
+    }
+    ```
 
 2. In the `Program.cs` file, create an AI chat client for Azure OpenAI and register DevExpress services:
 
-```csharp
-var openAiServiceSettings = builder.Configuration
-    .GetSection("AzureOpenAISettings")
-    .Get<AzureOpenAIServiceSettings>();
+    ```csharp
+    var openAiServiceSettings = builder.Configuration
+        .GetSection("AzureOpenAISettings")
+        .Get<AzureOpenAIServiceSettings>();
 
-if(openAiServiceSettings == null ||
-    string.IsNullOrEmpty(openAiServiceSettings.Endpoint) ||
-    string.IsNullOrEmpty(openAiServiceSettings.Key) ||
-    string.IsNullOrEmpty(openAiServiceSettings.DeploymentName))
-    throw new InvalidOperationException(
-        "Specify the Azure OpenAI endpoint, key, and deployment name in the 'appsettings.json' file.");
+    if(openAiServiceSettings == null ||
+        string.IsNullOrEmpty(openAiServiceSettings.Endpoint) ||
+        string.IsNullOrEmpty(openAiServiceSettings.Key) ||
+        string.IsNullOrEmpty(openAiServiceSettings.DeploymentName))
+        throw new InvalidOperationException(
+            "Specify the Azure OpenAI endpoint, key, and deployment name in the 'appsettings.json' file.");
 
-var chatClient = new AzureOpenAIClient(
-    new Uri(openAiServiceSettings.Endpoint),
-    new AzureKeyCredential(openAiServiceSettings.Key))
-    .GetChatClient(openAiServiceSettings.DeploymentName)
-    .AsIChatClient();
+    var chatClient = new AzureOpenAIClient(
+        new Uri(openAiServiceSettings.Endpoint),
+        new AzureKeyCredential(openAiServiceSettings.Key))
+        .GetChatClient(openAiServiceSettings.DeploymentName)
+        .AsIChatClient();
 
-builder.Services.AddScoped<IChatClient>((provider) => chatClient);
-builder.Services.AddDevExpressAI();
-```
+    builder.Services.AddScoped<IChatClient>((provider) => chatClient);
+    builder.Services.AddDevExpressAI();
+    ```
 
 **Note:** The example uses the "bring your own key (BYOK)" approach for AI integration.
 
@@ -54,7 +54,8 @@ The [Scheduler.razor](./Scheduler.razor) page contains the following DevExpress 
 
 * [Memo](#memo) - displays source text.
 * [Button](#button) - copies source text to the clipboard.
-* [Scheduler](#scheduler) - displays appointments. The compact and full edit forms include the Smart Paste button that extracts appointment details from the source text.
+* [Scheduler](#scheduler) - displays appointments. Compact and detailed edit forms include the Smart Paste button that extracts appointment details from source text.
+* [Loading Panel](#loading-panel) - displays a progress indicator while the Smart Paste operation is in progress.
 
 #### Memo
 
@@ -73,7 +74,7 @@ Place a [DxMemo](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxMemo) co
 
 #### Button
 
-Place a [DxButton](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxButton) component on the page and handle the `Click` event to copy the source text to the clipboard:
+Place a [DxButton](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxButton) component on the page and handle the `Click` event to copy source text to the clipboard:
 
 ```Razor
 <DxButton Text="Copy to Clipboard"
@@ -157,12 +158,10 @@ Place a [DxLoadingPanel](https://docs.devexpress.com/Blazor/DevExpress.Blazor.Dx
 
 #### Add a Smart Paste Button and Handle Its Click
 
-The [SmartPasteComponent.razor](SmartPasteComponent.razor) page defines a component that inherits from [SmartPasteBase](https://docs.devexpress.com/Blazor/DevExpress.AIIntegration.Blazor.SmartPasteBase) and renders a Smart Paste button that calls the `OnSmartPasteClick` method to start the Smart Paste operation, along with a loading panel that displays a progress indicator. The component uses the [SmartPasteAsync](https://docs.devexpress.com/Blazor/DevExpress.AIIntegration.Blazor.SmartPasteBase.SmartPasteAsync(System.String)) method inherited from `SmartPasteBase` to send the source text to the configured AI service:
+The [SmartPasteComponent.razor](SmartPasteComponent.razor) page defines a component that inherits from [SmartPasteBase](https://docs.devexpress.com/Blazor/DevExpress.AIIntegration.Blazor.SmartPasteBase). The component renders a Smart Paste button that calls the `OnSmartPasteClick` method on click. This method reads the clipboard text and passes it to the [SmartPasteAsync](https://docs.devexpress.com/Blazor/DevExpress.AIIntegration.Blazor.SmartPasteBase.SmartPasteAsync(System.String)) method.
 
 ```Razor
 <div id="smart-paste">
-    <DxLoadingPanel Visible="@IsProcessing" PositionTarget=".dxbl-apt-edit-dialog-container" ApplyBackgroundShading="true" />
-
     <DxButton Text="Smart Paste"
               IconUrl="@Icon.ClipboardPasteSparkle"
               RenderStyle="ButtonRenderStyle.Primary"
@@ -208,7 +207,7 @@ protected override IEnumerable<SmartPasteFieldInfo> GetSmartPasteFieldInfos(obje
 }
 ```
 
-The component also defines `FieldDescriptions` that helps the AI service identify the intended values in the source text:
+The component also defines `FieldDescriptions` that helps the AI service identify the intended values in source text:
 
 ```csharp
 static readonly Dictionary<string, string> FieldDescriptions = new() {
