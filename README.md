@@ -55,7 +55,7 @@ The [Scheduler.razor](./Scheduler.razor) page contains the following DevExpress 
 * [Memo](#memo) - displays source text.
 * [Button](#button) - copies source text to the clipboard.
 * [Scheduler](#scheduler) - displays appointments. Compact and detailed edit forms include the Smart Paste button that extracts appointment details from source text.
-* [Loading Panel](#loading-panel) - displays a progress indicator while the Smart Paste operation is in progress.
+* [Loading Panel](#loading-panel) - displays a progress indicator during the Smart Paste operation.
 
 #### Memo
 
