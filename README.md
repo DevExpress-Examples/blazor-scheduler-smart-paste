@@ -6,7 +6,7 @@ Automatically generated badges
 
 This example adds an AI-powered Smart Paste extension to the DevExpress Blazor [DxScheduler](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxScheduler) component. The appointment edit forms include Smart Paste buttons that simplify data entry when users copy appointment information from external sources to the clipboard. The Smart Paste extension then parses the clipboard text to fill a new appointment with details (a subject, start and end time values, location, and description).
 
-GIF
+![Scheduler Smart Paste](scheduler-smart-paste.png)
 
 ## Implementation Details
 
