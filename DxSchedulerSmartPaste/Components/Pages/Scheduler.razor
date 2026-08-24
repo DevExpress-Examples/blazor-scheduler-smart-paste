@@ -1,4 +1,4 @@
-﻿@page "/"
+@page "/"
 @using DevExpress.Images.Blazor
 @inject IJSRuntime JS
 
@@ -18,6 +18,8 @@
                 ResizeMode="MemoResizeMode.Vertical" />
     </div>
 
+    <DxLoadingPanel Visible="@IsProcessing" PositionTarget=".dxbl-apt-edit-dialog" ApplyBackgroundShading="true" />
+
     <DxScheduler @ref="scheduler"
                  CssClass="scheduler-panel"
                  DataStorage="@DataStorage"
@@ -34,7 +36,7 @@
             <DxSchedulerEndTimeFormLayoutItem />
             <DxSchedulerLocationFormLayoutItem />
             <DxSchedulerDescriptionFormLayoutItem />
-            <SmartPasteComponent AppointmentFormInfo="@((CustomAppointmentFormInfo)formInfo)" />
+            <SmartPasteComponent AppointmentFormInfo="@((CustomAppointmentFormInfo)formInfo)" @bind-IsProcessing="IsProcessing" />
         </AppointmentCompactFormLayout>
 
         <AppointmentFormLayout Context="formInfo">
@@ -46,7 +48,7 @@
             <DxSchedulerEndTimeFormLayoutItem />
             <DxSchedulerLocationFormLayoutItem />
             <DxSchedulerDescriptionFormLayoutItem />
-            <SmartPasteComponent AppointmentFormInfo="@((CustomAppointmentFormInfo)formInfo)" />
+            <SmartPasteComponent AppointmentFormInfo="@((CustomAppointmentFormInfo)formInfo)" @bind-IsProcessing="IsProcessing" />
         </AppointmentFormLayout>
 
         <Views>
@@ -59,6 +61,7 @@
     DxScheduler scheduler = default!;
     DateTime StartDate { get; set; } = new(2026, 7, 27);
     DxSchedulerDataStorage DataStorage { get; set; } = default!;
+    bool IsProcessing { get; set; } = false;
 
     string SourceText { get; set; } =
         "Hi,\n\nI'm confirming our Q4 Strategy Review on July 28, 2026. We will discuss about the proposed strategy points shared by our executives yesterday. We'll meet from 2:00 PM to 3:30 PM in Building 4, Room 204.\n\nThanks,\nJohn";
