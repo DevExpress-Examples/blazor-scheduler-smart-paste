@@ -6,9 +6,6 @@
 
 <div class="scheduler-page">
     <div class="source-text-panel">
-        <div class="source-text-panel-caption">
-            <strong>Sample source text.</strong> Copy it to the clipboard, then open (or create) an appointment and click <strong>Smart Paste</strong> in the edit form.
-        </div>
         <DxButton Text="Copy to Clipboard"
                   IconUrl="@Icon.ClipboardContent"
                   RenderStyle="ButtonRenderStyle.Secondary"
@@ -18,7 +15,9 @@
                 ResizeMode="MemoResizeMode.Vertical" />
     </div>
 
-    <DxLoadingPanel Visible="@IsProcessing" PositionTarget=".dxbl-apt-edit-dialog" ApplyBackgroundShading="true" />
+    @if (IsProcessing) {
+        <DxLoadingPanel Visible="true" PositionTarget=".dxbl-apt-edit-dialog" ApplyBackgroundShading="true" />
+    }
 
     <DxScheduler @ref="scheduler"
                  CssClass="scheduler-panel"
