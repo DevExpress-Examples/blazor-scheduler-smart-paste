@@ -1,4 +1,4 @@
-@page "/"
+﻿@page "/"
 @using DevExpress.Images.Blazor
 @inject IJSRuntime JS
 
@@ -66,13 +66,11 @@
     string SourceText { get; set; } =
         "Hi,\n\nI'm confirming our Q4 Strategy Review on July 28, 2026. We will discuss about the proposed strategy points shared by our executives yesterday. We'll meet from 2:00 PM to 3:30 PM in Building 4, Room 204.\n\nThanks,\nJohn";
 
-    async Task OnCopyToClipboardClick()
-    {
+    async Task OnCopyToClipboardClick() {
         await JS.InvokeVoidAsync("navigator.clipboard.writeText", SourceText);
     }
 
-    protected override void OnInitialized()
-    {
+    protected override void OnInitialized() {
         var appointments = new List<Appointment>
         {
             new()
@@ -86,11 +84,9 @@
             }
         };
 
-        DataStorage = new DxSchedulerDataStorage
-        {
+        DataStorage = new DxSchedulerDataStorage {
             AppointmentsSource = appointments,
-            AppointmentMappings = new DxSchedulerAppointmentMappings
-            {
+            AppointmentMappings = new DxSchedulerAppointmentMappings {
                 Id = nameof(Appointment.Id),
                 Subject = nameof(Appointment.Subject),
                 Start = nameof(Appointment.Start),
@@ -102,8 +98,7 @@
         };
     }
 
-    void OnAppointmentFormShowing(SchedulerAppointmentFormEventArgs args)
-    {
+    void OnAppointmentFormShowing(SchedulerAppointmentFormEventArgs args) {
         args.FormInfo = new CustomAppointmentFormInfo(args.Appointment, DataStorage, scheduler);
     }
 }
