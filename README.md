@@ -158,7 +158,7 @@ Place a [DxLoadingPanel](https://docs.devexpress.com/Blazor/DevExpress.Blazor.Dx
 
 #### Add a Smart Paste Button and Handle Its Click
 
-The [SmartPasteComponent.razor](SmartPasteComponent.razor) page defines a component that inherits from [SmartPasteBase](https://docs.devexpress.com/Blazor/DevExpress.AIIntegration.Blazor.SmartPasteBase). The component renders a Smart Paste button that calls the `OnSmartPasteClick` method on click. This method reads the clipboard text and passes it to the [SmartPasteAsync](https://docs.devexpress.com/Blazor/DevExpress.AIIntegration.Blazor.SmartPasteBase.SmartPasteAsync(System.String)) method.
+The [SmartPasteComponent.razor](SmartPasteComponent.razor) page defines a component that inherits from [SmartPasteBase](https://docs.devexpress.com/Blazor/DevExpress.AIIntegration.Blazor.SmartPasteBase). The component displays a Smart Paste button that calls the `OnSmartPasteClick` method on click. This method reads the clipboard text and passes it to the [SmartPasteAsync](https://docs.devexpress.com/Blazor/DevExpress.AIIntegration.Blazor.SmartPasteBase.SmartPasteAsync(System.String)) method.
 
 ```Razor
 <div id="smart-paste">
