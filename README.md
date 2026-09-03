@@ -22,7 +22,7 @@ This example adds an [AI-powered Smart Paste extension](https://docs.devexpress.
     }
     ```
 
-2. In the `Program.cs` file, create an AI chat client for Azure OpenAI and register DevExpress services:
+2. In the `Program.cs` file, configure an AI chat client for Azure OpenAI and register DevExpress services:
 
     ```csharp
     var openAiServiceSettings = builder.Configuration
