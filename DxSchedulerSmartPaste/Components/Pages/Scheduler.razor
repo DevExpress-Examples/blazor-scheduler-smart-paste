@@ -16,7 +16,7 @@
     </div>
 
     @if (IsProcessing) {
-        <DxLoadingPanel Visible="true" PositionTarget=".dxbl-apt-edit-dialog" ApplyBackgroundShading="true" />
+        <DxLoadingPanel Visible="true" PositionTarget=".apt-dialog" ApplyBackgroundShading="true" />
     }
 
     <DxScheduler @ref="scheduler"
@@ -25,6 +25,11 @@
                  StartDate="@StartDate"
                  ActiveViewType="SchedulerViewType.WorkWeek"
                  AppointmentFormShowing="OnAppointmentFormShowing">
+
+        <PopupSettings>
+            <DxSchedulerCompactFormSettings CssClass="apt-dialog" />
+            <DxSchedulerFormSettings CssClass="apt-dialog" />
+        </PopupSettings>
 
         <AppointmentCompactFormLayout Context="formInfo">
             <DxSchedulerSubjectFormLayoutItem />
@@ -35,7 +40,10 @@
             <DxSchedulerEndTimeFormLayoutItem />
             <DxSchedulerLocationFormLayoutItem />
             <DxSchedulerDescriptionFormLayoutItem />
-            <SmartPasteComponent AppointmentFormInfo="@((CustomAppointmentFormInfo)formInfo)" @bind-IsProcessing="IsProcessing" />
+            <SmartPasteComponent AppointmentFormInfo="@((CustomAppointmentFormInfo)formInfo)"
+                                 @bind-IsProcessing="IsProcessing"
+                                 PromptAugmentation="@PromptAugmentation"
+                                 ItemDescriptions="@ItemDescriptions" />
         </AppointmentCompactFormLayout>
 
         <AppointmentFormLayout Context="formInfo">
@@ -47,7 +55,10 @@
             <DxSchedulerEndTimeFormLayoutItem />
             <DxSchedulerLocationFormLayoutItem />
             <DxSchedulerDescriptionFormLayoutItem />
-            <SmartPasteComponent AppointmentFormInfo="@((CustomAppointmentFormInfo)formInfo)" @bind-IsProcessing="IsProcessing" />
+            <SmartPasteComponent AppointmentFormInfo="@((CustomAppointmentFormInfo)formInfo)"
+                                 @bind-IsProcessing="IsProcessing"
+                                 PromptAugmentation="@PromptAugmentation"
+                                 ItemDescriptions="@ItemDescriptions" />
         </AppointmentFormLayout>
 
         <Views>
@@ -57,6 +68,17 @@
 </div>
 
 @code {
+    static readonly string PromptAugmentation =
+    "Always override the current field value with the extracted one. If a value cannot be determined, leave the field unchanged.";
+
+    static readonly Dictionary<string, string> ItemDescriptions = new() {
+        { nameof(CustomAppointmentFormInfo.Subject), "Short appointment title." },
+        { nameof(CustomAppointmentFormInfo.Start), "Start date and time, (yyyy-MM-ddTHH:mm:ss)." },
+        { nameof(CustomAppointmentFormInfo.End), "End date and time, (yyyy-MM-ddTHH:mm:ss)." },
+        { nameof(CustomAppointmentFormInfo.Location), "Physical or virtual meeting location." },
+        { nameof(CustomAppointmentFormInfo.Description), "Summarized body of the appointment." }
+    };
+
     DxScheduler scheduler = default!;
     DateTime StartDate { get; set; } = new(2026, 7, 27);
     DxSchedulerDataStorage DataStorage { get; set; } = default!;

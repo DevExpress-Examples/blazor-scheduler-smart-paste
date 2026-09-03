@@ -6,4 +6,10 @@
     padding: 6px 6px 0;
     margin: 6px 0 0;
     border-top: 1px solid var(--dxds-color-border-base-default-rest);
+    align-items: center;
+}
+
+.smart-paste-error {
+    color: var(--dxds-color-surface-danger-default-rest, #C50F1F);
+    margin-right: 0.5rem;
 }

@@ -8,6 +8,10 @@
 @inherits SmartPasteBase
 
 <div id="smart-paste">
+    @if (!string.IsNullOrEmpty(ErrorMessage)) {
+        <div class="smart-paste-error" role="alert">@ErrorMessage</div>
+    }
+
     <DxButton Text="Smart Paste"
               IconUrl="@Icon.ClipboardPasteSparkle"
               RenderStyle="ButtonRenderStyle.Primary"
@@ -24,24 +28,30 @@
     [Parameter]
     public EventCallback<bool> IsProcessingChanged { get; set; }
 
+    string? ErrorMessage { get; set; }
+
+    protected override void OnInitialized() {
+        Completed = EventCallback.Factory.Create<SmartPasteCompletedEventArgs>(this, OnSmartPasteCompleted);
+        base.OnInitialized();
+    }
+
     async Task SetIsProcessing(bool value) {
         IsProcessing = value;
         await IsProcessingChanged.InvokeAsync(value);
     }
 
-    static readonly Dictionary<string, string> FieldDescriptions = new()
-    {
-        { nameof(CustomAppointmentFormInfo.Subject), "Short appointment title." },
-        { nameof(CustomAppointmentFormInfo.Start), "Start date and time, (yyyy-MM-ddTHH:mm:ss)." },
-        { nameof(CustomAppointmentFormInfo.End), "End date and time, (yyyy-MM-ddTHH:mm:ss)." },
-        { nameof(CustomAppointmentFormInfo.Location), "Physical or virtual meeting location." },
-        { nameof(CustomAppointmentFormInfo.Description), "Summarized body of the appointment." }
-    };
+    async Task OnSmartPasteCompleted(SmartPasteCompletedEventArgs args) {
+        if(args.IsError) {
+            ErrorMessage = $"Smart Paste failed: {args.ErrorMessage}";
+        }
+        else if(args.Response is not { IsCompleted: true }) {
+            ErrorMessage = $"Smart Paste did not complete: {args.Response?.Status}";
+        }
+        else {
+            ErrorMessage = null;
+        }
 
-    protected override void OnInitialized() {
-        base.OnInitialized();
-        PromptAugmentation = "Always override the current field value with the extracted one. If a value cannot be determined, leave the field unchanged.";
-        ItemDescriptions = FieldDescriptions;
+        await SetIsProcessing(false);
     }
 
     protected override object? GetDataObject() => AppointmentFormInfo;
@@ -97,21 +107,19 @@
         return false;
     }
 
-    protected override Task OnValuesApplied(IList<KeyValuePair<string, object?>> appliedValues) {
-        return SetIsProcessing(false);
-    }
-
     protected async Task OnSmartPasteClick() {
-        string? clipboardText = null;
+        string? clipboardText;
         try {
             clipboardText = await JS.InvokeAsync<string>("navigator.clipboard.readText");
         }
-        catch(Exception ex) {
-            throw new Exception(ex.Message);
+        catch(Exception) {
+            ErrorMessage = "Clipboard access unavailable.";
+            return;
         }
 
         if(string.IsNullOrWhiteSpace(clipboardText)) return;
 
+        ErrorMessage = null;
         await SetIsProcessing(true);
         await SmartPasteAsync(clipboardText);
     }
