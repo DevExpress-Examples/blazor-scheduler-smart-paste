@@ -33,7 +33,7 @@ var chatClient = new AzureOpenAIClient(
     .GetChatClient(openAiServiceSettings.DeploymentName)
     .AsIChatClient();
 
-builder.Services.AddScoped<IChatClient>((provider) => chatClient);
+builder.Services.AddSingleton(chatClient);
 builder.Services.AddDevExpressAI();
 
 var app = builder.Build();
