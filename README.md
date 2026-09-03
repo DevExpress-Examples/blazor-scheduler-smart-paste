@@ -46,7 +46,8 @@ This example adds an [AI-powered Smart Paste extension](https://docs.devexpress.
     builder.Services.AddDevExpressAI();
     ```
 
-**Note:** The example uses the "bring your own key (BYOK)" approach for AI integration.
+> [!NOTE]  
+> DevExpress AI-powered extensions follow the "bring your own key" principle. DevExpress does not offer a REST API and does not ship any built-in LLMs/SLMs. You need an active Azure/Open AI subscription to obtain the REST API endpoint, key, and model deployment name. These variables must be specified at application startup to register AI clients and enable DevExpress AI-powered Extensions in your application.
 
 ### Add DevExpress Components
 
