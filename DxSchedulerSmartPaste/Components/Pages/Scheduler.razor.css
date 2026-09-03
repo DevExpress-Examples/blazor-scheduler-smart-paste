@@ -13,13 +13,20 @@
     min-width: 260px;
 }
 
-.source-text-panel-caption {
-    color: var(--dxds-color-content-secondary-default-rest);
-    font-size: var(--dxds-font-size-caption-md);
-}
-
 ::deep .scheduler-panel {
     flex: 1 1 auto;
     min-width: 0;
     height: 640px;
+}
+
+@media (max-width: 768px) {
+    .scheduler-page {
+        flex-direction: column;
+    }
+
+    .source-text-panel {
+        flex: 0 0 auto;
+        width: 100%;
+        min-width: 0;
+    }
 }
