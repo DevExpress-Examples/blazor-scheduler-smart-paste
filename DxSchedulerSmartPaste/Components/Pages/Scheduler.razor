@@ -43,7 +43,9 @@
             <SmartPasteComponent AppointmentFormInfo="@((CustomAppointmentFormInfo)formInfo)"
                                  @bind-IsProcessing="IsProcessing"
                                  PromptAugmentation="@PromptAugmentation"
-                                 ItemDescriptions="@ItemDescriptions" />
+                                 ItemDescriptions="@ItemDescriptions"
+                                 ErrorMessage="@ErrorMessage"
+                                 Completed="OnSmartPasteCompleted" />
         </AppointmentCompactFormLayout>
 
         <AppointmentFormLayout Context="formInfo">
@@ -58,7 +60,9 @@
             <SmartPasteComponent AppointmentFormInfo="@((CustomAppointmentFormInfo)formInfo)"
                                  @bind-IsProcessing="IsProcessing"
                                  PromptAugmentation="@PromptAugmentation"
-                                 ItemDescriptions="@ItemDescriptions" />
+                                 ItemDescriptions="@ItemDescriptions"
+                                 ErrorMessage="@ErrorMessage"
+                                 Completed="OnSmartPasteCompleted" />
         </AppointmentFormLayout>
 
         <Views>
@@ -83,6 +87,7 @@
     DateTime StartDate { get; set; } = new(2026, 7, 27);
     DxSchedulerDataStorage DataStorage { get; set; } = default!;
     bool IsProcessing { get; set; } = false;
+    string ErrorMessage { get; set; } = string.Empty;
 
     string SourceText { get; set; } =
         "Hi,\n\nI'm confirming our Q4 Strategy Review on July 28, 2026. We will discuss about the proposed strategy points shared by our executives yesterday. We'll meet from 2:00 PM to 3:30 PM in Building 4, Room 204.\n\nThanks,\nJohn";
@@ -121,5 +126,17 @@
 
     void OnAppointmentFormShowing(SchedulerAppointmentFormEventArgs args) {
         args.FormInfo = new CustomAppointmentFormInfo(args.Appointment, DataStorage, scheduler);
+    }
+
+    void OnSmartPasteCompleted(SmartPasteCompletedEventArgs args) {
+        if(args.IsError) {
+            ErrorMessage = $"Smart Paste failed: {args.ErrorMessage}";
+        }
+        else if(args.Response is not { IsCompleted: true }) {
+            ErrorMessage = $"Smart Paste did not complete: {args.Response?.Status}";
+        }
+        else {
+            ErrorMessage = string.Empty;
+        }
     }
 }

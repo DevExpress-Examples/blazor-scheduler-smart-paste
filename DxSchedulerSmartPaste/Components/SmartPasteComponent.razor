@@ -1,5 +1,4 @@
 ﻿@using System.Globalization
-@using DevExpress.AIIntegration.Blazor
 @using DevExpress.Blazor
 @using Microsoft.AspNetCore.Components
 @using DxSchedulerSmartPaste.Models
@@ -28,30 +27,12 @@
     [Parameter]
     public EventCallback<bool> IsProcessingChanged { get; set; }
 
-    string? ErrorMessage { get; set; }
-
-    protected override void OnInitialized() {
-        Completed = EventCallback.Factory.Create<SmartPasteCompletedEventArgs>(this, OnSmartPasteCompleted);
-        base.OnInitialized();
-    }
+    [Parameter]
+    public string? ErrorMessage { get; set; }
 
     async Task SetIsProcessing(bool value) {
         IsProcessing = value;
         await IsProcessingChanged.InvokeAsync(value);
-    }
-
-    async Task OnSmartPasteCompleted(SmartPasteCompletedEventArgs args) {
-        if(args.IsError) {
-            ErrorMessage = $"Smart Paste failed: {args.ErrorMessage}";
-        }
-        else if(args.Response is not { IsCompleted: true }) {
-            ErrorMessage = $"Smart Paste did not complete: {args.Response?.Status}";
-        }
-        else {
-            ErrorMessage = null;
-        }
-
-        await SetIsProcessing(false);
     }
 
     protected override object? GetDataObject() => AppointmentFormInfo;
@@ -121,7 +102,12 @@
 
         ErrorMessage = null;
         await SetIsProcessing(true);
-        await SmartPasteAsync(clipboardText);
+        try {
+            await SmartPasteAsync(clipboardText);
+        }
+        finally {
+            await SetIsProcessing(false);
+        }
     }
 
     static DateTime ToDateTime(object? value, DateTime fallback) =>
