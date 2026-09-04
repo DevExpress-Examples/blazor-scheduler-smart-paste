@@ -42,9 +42,9 @@
             <DxSchedulerDescriptionFormLayoutItem />
             <SmartPasteComponent AppointmentFormInfo="@((CustomAppointmentFormInfo)formInfo)"
                                  @bind-IsProcessing="IsProcessing"
+                                 @bind-ErrorMessage="ErrorMessage"
                                  PromptAugmentation="@PromptAugmentation"
                                  ItemDescriptions="@ItemDescriptions"
-                                 ErrorMessage="@ErrorMessage"
                                  Completed="OnSmartPasteCompleted" />
         </AppointmentCompactFormLayout>
 
@@ -59,9 +59,9 @@
             <DxSchedulerDescriptionFormLayoutItem />
             <SmartPasteComponent AppointmentFormInfo="@((CustomAppointmentFormInfo)formInfo)"
                                  @bind-IsProcessing="IsProcessing"
+                                 @bind-ErrorMessage="ErrorMessage"
                                  PromptAugmentation="@PromptAugmentation"
                                  ItemDescriptions="@ItemDescriptions"
-                                 ErrorMessage="@ErrorMessage"
                                  Completed="OnSmartPasteCompleted" />
         </AppointmentFormLayout>
 

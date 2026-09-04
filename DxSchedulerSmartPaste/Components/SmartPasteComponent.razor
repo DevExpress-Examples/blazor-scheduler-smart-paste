@@ -30,9 +30,17 @@
     [Parameter]
     public string? ErrorMessage { get; set; }
 
+    [Parameter]
+    public EventCallback<string?> ErrorMessageChanged { get; set; }
+
     async Task SetIsProcessing(bool value) {
         IsProcessing = value;
         await IsProcessingChanged.InvokeAsync(value);
+    }
+
+    async Task SetErrorMessage(string? value) {
+        ErrorMessage = value;
+        await ErrorMessageChanged.InvokeAsync(value);
     }
 
     protected override object? GetDataObject() => AppointmentFormInfo;
@@ -94,13 +102,13 @@
             clipboardText = await JS.InvokeAsync<string>("navigator.clipboard.readText");
         }
         catch(Exception) {
-            ErrorMessage = "Clipboard access unavailable.";
+            await SetErrorMessage("Clipboard access unavailable.");
             return;
         }
 
         if(string.IsNullOrWhiteSpace(clipboardText)) return;
 
-        ErrorMessage = null;
+        await SetErrorMessage(null);
         await SetIsProcessing(true);
         try {
             await SmartPasteAsync(clipboardText);
