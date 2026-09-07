@@ -42,7 +42,7 @@ This example adds an [AI-powered Smart Paste extension](https://docs.devexpress.
         .GetChatClient(openAiServiceSettings.DeploymentName)
         .AsIChatClient();
 
-    builder.Services.AddScoped<IChatClient>((provider) => chatClient);
+    builder.Services.AddSingleton(chatClient);
     builder.Services.AddDevExpressAI();
     ```
 
@@ -51,7 +51,7 @@ This example adds an [AI-powered Smart Paste extension](https://docs.devexpress.
 
 ### Add DevExpress Components
 
-The [Scheduler.razor](./Scheduler.razor) page contains the following DevExpress Blazor components:
+The [Scheduler.razor](./DxSchedulerSmartPaste/Components/Pages/Scheduler.razor) page contains the following DevExpress Blazor components:
 
 * [Memo](#memo) - displays source text.
 * [Button](#button) - copies source text to the clipboard.
@@ -113,7 +113,12 @@ Place a [DxButton](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxButton
         <DxSchedulerEndTimeFormLayoutItem />
         <DxSchedulerLocationFormLayoutItem />
         <DxSchedulerDescriptionFormLayoutItem />
-        <SmartPasteComponent AppointmentFormInfo="@((CustomAppointmentFormInfo)formInfo)" @bind-IsProcessing="IsProcessing" />
+        <SmartPasteComponent AppointmentFormInfo="@((CustomAppointmentFormInfo)formInfo)"
+                             @bind-IsProcessing="IsProcessing"
+                             @bind-ErrorMessage="ErrorMessage"
+                             PromptAugmentation="@PromptAugmentation"
+                             ItemDescriptions="@ItemDescriptions"
+                             Completed="OnSmartPasteCompleted" />
     </AppointmentCompactFormLayout>
 
     <AppointmentFormLayout Context="formInfo">
@@ -125,7 +130,12 @@ Place a [DxButton](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxButton
         <DxSchedulerEndTimeFormLayoutItem />
         <DxSchedulerLocationFormLayoutItem />
         <DxSchedulerDescriptionFormLayoutItem />
-        <SmartPasteComponent AppointmentFormInfo="@((CustomAppointmentFormInfo)formInfo)" @bind-IsProcessing="IsProcessing" />
+        <SmartPasteComponent AppointmentFormInfo="@((CustomAppointmentFormInfo)formInfo)"
+                             @bind-IsProcessing="IsProcessing"
+                             @bind-ErrorMessage="ErrorMessage"
+                             PromptAugmentation="@PromptAugmentation"
+                             ItemDescriptions="@ItemDescriptions"
+                             Completed="OnSmartPasteCompleted" />
     </AppointmentFormLayout>
 
     <Views>
@@ -134,15 +144,40 @@ Place a [DxButton](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxButton
 </DxScheduler>
 
 @code {
+    static readonly string PromptAugmentation =
+        "Always override the current field value with the extracted one. If a value cannot be determined, leave the field unchanged.";
+
+    static readonly Dictionary<string, string> ItemDescriptions = new() {
+        { nameof(CustomAppointmentFormInfo.Subject), "Short appointment title." },
+        { nameof(CustomAppointmentFormInfo.Start), "Start date and time, (yyyy-MM-ddTHH:mm:ss)." },
+        { nameof(CustomAppointmentFormInfo.End), "End date and time, (yyyy-MM-ddTHH:mm:ss)." },
+        { nameof(CustomAppointmentFormInfo.Location), "Physical or virtual meeting location." },
+        { nameof(CustomAppointmentFormInfo.Description), "Summarized body of the appointment." }
+    };
+
     DxScheduler scheduler = default!;
     DateTime StartDate { get; set; } = new(2026, 7, 27);
     DxSchedulerDataStorage DataStorage { get; set; } = default!;
+    bool IsProcessing { get; set; } = false;
+    string ErrorMessage { get; set; } = string.Empty;
 
     ...
 
     void OnAppointmentFormShowing(SchedulerAppointmentFormEventArgs args) {
         args.FormInfo = new CustomAppointmentFormInfo(args.Appointment, DataStorage, scheduler);
     }
+
+    void OnSmartPasteCompleted(SmartPasteCompletedEventArgs args) {
+        if(args.IsError) {
+            ErrorMessage = $"Smart Paste failed: {args.ErrorMessage}";
+        }
+        else if(args.Response is not { IsCompleted: true }) {
+            ErrorMessage = $"Smart Paste did not complete: {args.Response?.Status}";
+        }
+        else {
+            ErrorMessage = string.Empty;
+        }
+}
 }
 ```
 
@@ -151,18 +186,25 @@ Place a [DxButton](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxButton
 Place a [DxLoadingPanel](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxLoadingPanel) component on the page to display a progress indicator while the Smart Paste operation is in progress:
 
 ```Razor
-<DxLoadingPanel Visible="@IsProcessing" PositionTarget=".dxbl-apt-edit-dialog" ApplyBackgroundShading="true" />
-
+@if (IsProcessing) {
+    <DxLoadingPanel Visible="true" PositionTarget=".apt-dialog" ApplyBackgroundShading="true" />
+}
 ```
+
+The Smart Paste component sets the `IsProcessing` property to true before the Smart Paste operation starts and sets it to false after the operation completes. Refer to the [Track the Smart Paste Operation](#track-the-smart-paste-operation) section for details.
 
 ### Create a Smart Paste Component
 
 #### Add a Smart Paste Button and Handle Its Click
 
-The [SmartPasteComponent.razor](SmartPasteComponent.razor) page defines a component that inherits from [SmartPasteBase](https://docs.devexpress.com/Blazor/DevExpress.AIIntegration.Blazor.SmartPasteBase). The component displays a Smart Paste button that calls the `OnSmartPasteClick` method on click. This method reads the clipboard text and passes it to the [SmartPasteAsync](https://docs.devexpress.com/Blazor/DevExpress.AIIntegration.Blazor.SmartPasteBase.SmartPasteAsync(System.String)) method.
+The [SmartPasteComponent.razor](./DxSchedulerSmartPaste/Components/SmartPasteComponent.razor) page defines a component that inherits from [SmartPasteBase](https://docs.devexpress.com/Blazor/DevExpress.AIIntegration.Blazor.SmartPasteBase). The component displays a Smart Paste button that calls the `OnSmartPasteClick` method on click. This method reads the clipboard text and passes it to the [SmartPasteAsync](https://docs.devexpress.com/Blazor/DevExpress.AIIntegration.Blazor.SmartPasteBase.SmartPasteAsync(System.String)) method. The component also displays an error message if the Smart Paste operation fails.
 
 ```Razor
 <div id="smart-paste">
+    @if (!string.IsNullOrEmpty(ErrorMessage)) {
+        <div class="smart-paste-error" role="alert">@ErrorMessage</div>
+    }
+
     <DxButton Text="Smart Paste"
               IconUrl="@Icon.ClipboardPasteSparkle"
               RenderStyle="ButtonRenderStyle.Primary"
@@ -173,21 +215,49 @@ The [SmartPasteComponent.razor](SmartPasteComponent.razor) page defines a compon
     [Parameter]
     public CustomAppointmentFormInfo? AppointmentFormInfo { get; set; }
 
-    protected bool IsProcessing { get; set; } = false;
+    [Parameter]
+    public bool IsProcessing { get; set; } = false;
+
+    [Parameter]
+    public EventCallback<bool> IsProcessingChanged { get; set; }
+
+    [Parameter]
+    public string? ErrorMessage { get; set; }
+
+    [Parameter]
+    public EventCallback<string?> ErrorMessageChanged { get; set; }
+
+    async Task SetIsProcessing(bool value) {
+        IsProcessing = value;
+        await IsProcessingChanged.InvokeAsync(value);
+    }
+
+    async Task SetErrorMessage(string? value) {
+        ErrorMessage = value;
+        await ErrorMessageChanged.InvokeAsync(value);
+    }
 
     protected async Task OnSmartPasteClick() {
-        string? clipboardText = null;
+        string? clipboardText;
         try {
             clipboardText = await JS.InvokeAsync<string>("navigator.clipboard.readText");
         }
-        catch (Exception ex) {
-            throw new Exception(ex.Message);
+        catch(Exception) {
+            await SetErrorMessage("Clipboard access unavailable.");
+            return;
         }
 
-        if (string.IsNullOrWhiteSpace(clipboardText)) return;
+        if(string.IsNullOrWhiteSpace(clipboardText)) return;
 
-        IsProcessing = true;
-        await SmartPasteAsync(clipboardText);
+        await SetErrorMessage(null);
+        await SetIsProcessing(true);
+        try {
+            await SmartPasteAsync(clipboardText);
+        }
+        finally {
+            await SetIsProcessing(false);
+        }
+    }
 }
 ```
 
@@ -208,32 +278,6 @@ protected override IEnumerable<SmartPasteFieldInfo> GetSmartPasteFieldInfos(obje
 }
 ```
 
-The component also defines `FieldDescriptions` that helps the AI service identify the intended values in source text:
-
-```csharp
-static readonly Dictionary<string, string> FieldDescriptions = new() {
-    { nameof(CustomAppointmentFormInfo.Subject), "Short appointment title." },
-    { nameof(CustomAppointmentFormInfo.Start),
-        "Start date and time, (yyyy-MM-ddTHH:mm:ss)." },
-    { nameof(CustomAppointmentFormInfo.End),
-        "End date and time, (yyyy-MM-ddTHH:mm:ss)." },
-    { nameof(CustomAppointmentFormInfo.Location),
-        "Physical or virtual meeting location." },
-    { nameof(CustomAppointmentFormInfo.Description),
-        "Summarized body of the appointment." }
-};
-```
-
-In the `OnInitialized` method, use [ItemDescriptions](https://docs.devexpress.com/Blazor/DevExpress.AIIntegration.Blazor.SmartPasteBase.ItemDescriptions) and [PromptAugmentation](https://docs.devexpress.com/Blazor/DevExpress.AIIntegration.Blazor.SmartPasteBase.PromptAugmentation) properties to assign field descriptions and an additional prompt instruction:
-
-```csharp
-protected override void OnInitialized() {
-    base.OnInitialized();
-    PromptAugmentation = "Always override the current field value with the extracted value. If a value cannot be determined, leave the field unchanged.";
-    ItemDescriptions = FieldDescriptions;
-}
-```
-
 #### Apply Extracted Values to the Scheduler Appointment
 
 Override `SetFieldValue` to map values returned by the Smart Paste operation to `CustomAppointmentFormInfo` object properties:
@@ -243,7 +287,7 @@ protected override bool SetFieldValue(object data, string fieldName, object? val
     var info = (CustomAppointmentFormInfo)data!;
     convertedValue = null;
 
-    switch (fieldName) 
+    switch (fieldName) {
         case nameof(info.Subject):
             var subjectStr = value as string ?? Convert.ToString(value ?? string.Empty);
             info.Subject = subjectStr;
@@ -281,20 +325,38 @@ protected override bool SetFieldValue(object data, string fieldName, object? val
 
 #### Track the Smart Paste Operation
 
-The application displays a loading panel while the AI service processes the request. The `OnValuesApplied` override resets the processing state after Smart Paste finishes applying the extracted values:
+The application displays a [loading panel](#loading-panel) while the AI service processes the request. [Scheduler.razor](./DxSchedulerSmartPaste/Components/Pages/Scheduler.razor) binds the `IsProcessing` parameter to `SmartPasteComponent`. The component sets this flag before and after `SmartPasteAsync`:
 
 ```csharp
-protected override Task OnValuesApplied( IList<KeyValuePair<string, object?>> appliedValues) {
-    IsProcessing = false;
-    return Task.CompletedTask;
+[Parameter]
+public bool IsProcessing { get; set; } = false;
+
+[Parameter]
+public EventCallback<bool> IsProcessingChanged { get; set; }
+
+async Task SetIsProcessing(bool value) {
+    IsProcessing = value;
+    await IsProcessingChanged.InvokeAsync(value);
+}
+
+protected async Task OnSmartPasteClick() {
+    // ...read clipboard and validation...
+    await SetErrorMessage(null);
+    await SetIsProcessing(true);
+    try {
+        await SmartPasteAsync(clipboardText);
+    }
+    finally {
+        await SetIsProcessing(false);
+    }
 }
 ```
 
 ## Files to Review
 
-- [Scheduler.razor](./Scheduler.razor)
-- [SmartPasteComponent.razor](./SmartPasteComponent.razor)
-- [Program.cs](./Program.cs) 
+- [Scheduler.razor](./DxSchedulerSmartPaste/Components/Pages/Scheduler.razor)
+- [SmartPasteComponent.razor](./DxSchedulerSmartPaste/Components/SmartPasteComponent.razor)
+- [Program.cs](./DxSchedulerSmartPaste/Program.cs)
 
 ## Documentation
 
