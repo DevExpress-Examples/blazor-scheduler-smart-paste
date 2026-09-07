@@ -4,7 +4,7 @@ Automatically generated badges
 
 # Blazor Scheduler — AI-powered Smart Paste
 
-This example adds an [AI-powered Smart Paste extension](https://docs.devexpress.com/Blazor/DevExpress.AIIntegration.Blazor.SmartPasteBase) to the DevExpress Blazor [Scheduler](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxScheduler) component. Appointment edit forms include Smart Paste buttons that simplify data entry when users copy appointment information from external sources. The Smart Paste extension then parses the clipboard text to fill a new appointment with details (a subject, start and end time values, location, and description).
+This example adds an [AI-powered Smart Paste extension](https://docs.devexpress.com/Blazor/DevExpress.AIIntegration.Blazor.SmartPasteBase) to the DevExpress Blazor [Scheduler](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxScheduler) component. Appointment edit forms include Smart Paste buttons that simplify data entry when users copy appointment information from external sources. The Smart Paste extension parses the clipboard text to fill a new appointment with details (a subject, start and end time values, location, and description).
 
 ![Scheduler Smart Paste](scheduler-smart-paste.png)
 
@@ -22,7 +22,7 @@ This example adds an [AI-powered Smart Paste extension](https://docs.devexpress.
     }
     ```
 
-2. In the `Program.cs` file, create an AI chat client for Azure OpenAI and register DevExpress services:
+2. In the `Program.cs` file, configure an AI chat client for Azure OpenAI and register DevExpress services:
 
     ```csharp
     var openAiServiceSettings = builder.Configuration
@@ -46,7 +46,8 @@ This example adds an [AI-powered Smart Paste extension](https://docs.devexpress.
     builder.Services.AddDevExpressAI();
     ```
 
-**Note:** The example uses the "bring your own key (BYOK)" approach for AI integration.
+> [!NOTE]  
+> DevExpress AI-powered extensions follow the "bring your own key" principle. DevExpress does not offer a REST API and does not ship any built-in LLMs/SLMs. You need an active Azure/Open AI subscription to obtain the REST API endpoint, key, and model deployment name. These variables must be specified at application startup to register AI clients and enable DevExpress AI-powered Extensions in your application.
 
 ### Add DevExpress Components
 
@@ -158,7 +159,7 @@ Place a [DxLoadingPanel](https://docs.devexpress.com/Blazor/DevExpress.Blazor.Dx
 
 #### Add a Smart Paste Button and Handle Its Click
 
-The [SmartPasteComponent.razor](SmartPasteComponent.razor) page defines a component that inherits from [SmartPasteBase](https://docs.devexpress.com/Blazor/DevExpress.AIIntegration.Blazor.SmartPasteBase). The component renders a Smart Paste button that calls the `OnSmartPasteClick` method on click. This method reads the clipboard text and passes it to the [SmartPasteAsync](https://docs.devexpress.com/Blazor/DevExpress.AIIntegration.Blazor.SmartPasteBase.SmartPasteAsync(System.String)) method.
+The [SmartPasteComponent.razor](SmartPasteComponent.razor) page defines a component that inherits from [SmartPasteBase](https://docs.devexpress.com/Blazor/DevExpress.AIIntegration.Blazor.SmartPasteBase). The component displays a Smart Paste button that calls the `OnSmartPasteClick` method on click. This method reads the clipboard text and passes it to the [SmartPasteAsync](https://docs.devexpress.com/Blazor/DevExpress.AIIntegration.Blazor.SmartPasteBase.SmartPasteAsync(System.String)) method.
 
 ```Razor
 <div id="smart-paste">

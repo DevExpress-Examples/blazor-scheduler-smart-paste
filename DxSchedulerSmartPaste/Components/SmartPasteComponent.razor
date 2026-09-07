@@ -1,4 +1,4 @@
-@using System.Globalization
+﻿@using System.Globalization
 @using DevExpress.AIIntegration.Blazor
 @using DevExpress.Blazor
 @using Microsoft.AspNetCore.Components
@@ -24,8 +24,7 @@
     [Parameter]
     public EventCallback<bool> IsProcessingChanged { get; set; }
 
-    async Task SetIsProcessing(bool value)
-    {
+    async Task SetIsProcessing(bool value) {
         IsProcessing = value;
         await IsProcessingChanged.InvokeAsync(value);
     }
@@ -39,8 +38,7 @@
         { nameof(CustomAppointmentFormInfo.Description), "Summarized body of the appointment." }
     };
 
-    protected override void OnInitialized()
-    {
+    protected override void OnInitialized() {
         base.OnInitialized();
         PromptAugmentation = "Always override the current field value with the extracted one. If a value cannot be determined, leave the field unchanged.";
         ItemDescriptions = FieldDescriptions;
@@ -49,9 +47,8 @@
     protected override object? GetDataObject() => AppointmentFormInfo;
     protected override string GetTargetElementId() => "smart-paste";
 
-    protected override IEnumerable<SmartPasteFieldInfo> GetSmartPasteFieldInfos(object data)
-    {
-        if (data is not CustomAppointmentFormInfo info)
+    protected override IEnumerable<SmartPasteFieldInfo> GetSmartPasteFieldInfos(object data) {
+        if(data is not CustomAppointmentFormInfo info)
             yield break;
 
         yield return new SmartPasteFieldInfo(nameof(info.Subject), typeof(string), info.Subject);
@@ -61,13 +58,11 @@
         yield return new SmartPasteFieldInfo(nameof(info.Description), typeof(string), info.Description);
     }
 
-    protected override bool SetFieldValue(object data, string fieldName, object? value, out object? convertedValue)
-    {
+    protected override bool SetFieldValue(object data, string fieldName, object? value, out object? convertedValue) {
         var info = (CustomAppointmentFormInfo)data!;
         convertedValue = null;
 
-        switch (fieldName)
-        {
+        switch(fieldName) {
             case nameof(info.Subject):
                 var subjectStr = value as string ?? Convert.ToString(value ?? string.Empty);
                 info.Subject = subjectStr;
@@ -82,7 +77,7 @@
 
             case nameof(info.End):
                 var endDt = ToDateTime(value, info.End);
-                if (endDt < info.Start) endDt = info.Start;
+                if(endDt < info.Start) endDt = info.Start;
                 info.End = endDt;
                 convertedValue = endDt;
                 return true;
@@ -102,32 +97,27 @@
         return false;
     }
 
-    protected override Task OnValuesApplied(IList<KeyValuePair<string, object?>> appliedValues)
-    {
+    protected override Task OnValuesApplied(IList<KeyValuePair<string, object?>> appliedValues) {
         return SetIsProcessing(false);
     }
 
-    protected async Task OnSmartPasteClick()
-    {
+    protected async Task OnSmartPasteClick() {
         string? clipboardText = null;
-        try
-        {
+        try {
             clipboardText = await JS.InvokeAsync<string>("navigator.clipboard.readText");
         }
-        catch (Exception ex)
-        {
+        catch(Exception ex) {
             throw new Exception(ex.Message);
         }
 
-        if (string.IsNullOrWhiteSpace(clipboardText)) return;
+        if(string.IsNullOrWhiteSpace(clipboardText)) return;
 
         await SetIsProcessing(true);
         await SmartPasteAsync(clipboardText);
     }
 
     static DateTime ToDateTime(object? value, DateTime fallback) =>
-        value switch
-        {
+        value switch {
             null => fallback,
             DateTime dt => dt,
             DateTimeOffset dto => dto.DateTime,

@@ -6,9 +6,6 @@
 
 <div class="scheduler-page">
     <div class="source-text-panel">
-        <div class="source-text-panel-caption">
-            Copy source text to the clipboard, create a new appointment, and click <strong>Smart Paste</strong> in the edit form.
-        </div>
         <DxButton Text="Copy to Clipboard"
                   IconUrl="@Icon.ClipboardContent"
                   RenderStyle="ButtonRenderStyle.Secondary"
@@ -18,7 +15,9 @@
                 ResizeMode="MemoResizeMode.Vertical" />
     </div>
 
-    <DxLoadingPanel Visible="@IsProcessing" PositionTarget=".dxbl-apt-edit-dialog" ApplyBackgroundShading="true" />
+    @if (IsProcessing) {
+        <DxLoadingPanel Visible="true" PositionTarget=".dxbl-apt-edit-dialog" ApplyBackgroundShading="true" />
+    }
 
     <DxScheduler @ref="scheduler"
                  CssClass="scheduler-panel"
@@ -66,13 +65,11 @@
     string SourceText { get; set; } =
         "Hi,\n\nI'm confirming our Q4 Strategy Review on July 28, 2026. We will discuss about the proposed strategy points shared by our executives yesterday. We'll meet from 2:00 PM to 3:30 PM in Building 4, Room 204.\n\nThanks,\nJohn";
 
-    async Task OnCopyToClipboardClick()
-    {
+    async Task OnCopyToClipboardClick() {
         await JS.InvokeVoidAsync("navigator.clipboard.writeText", SourceText);
     }
 
-    protected override void OnInitialized()
-    {
+    protected override void OnInitialized() {
         var appointments = new List<Appointment>
         {
             new()
@@ -86,11 +83,9 @@
             }
         };
 
-        DataStorage = new DxSchedulerDataStorage
-        {
+        DataStorage = new DxSchedulerDataStorage {
             AppointmentsSource = appointments,
-            AppointmentMappings = new DxSchedulerAppointmentMappings
-            {
+            AppointmentMappings = new DxSchedulerAppointmentMappings {
                 Id = nameof(Appointment.Id),
                 Subject = nameof(Appointment.Subject),
                 Start = nameof(Appointment.Start),
@@ -102,8 +97,7 @@
         };
     }
 
-    void OnAppointmentFormShowing(SchedulerAppointmentFormEventArgs args)
-    {
+    void OnAppointmentFormShowing(SchedulerAppointmentFormEventArgs args) {
         args.FormInfo = new CustomAppointmentFormInfo(args.Appointment, DataStorage, scheduler);
     }
 }
