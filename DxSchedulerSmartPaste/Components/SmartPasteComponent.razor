@@ -1,5 +1,4 @@
 ﻿@using System.Globalization
-@using DevExpress.AIIntegration.Blazor
 @using DevExpress.Blazor
 @using Microsoft.AspNetCore.Components
 @using DxSchedulerSmartPaste.Models
@@ -8,6 +7,10 @@
 @inherits SmartPasteBase
 
 <div id="smart-paste">
+    @if (!string.IsNullOrEmpty(ErrorMessage)) {
+        <div class="smart-paste-error" role="alert">@ErrorMessage</div>
+    }
+
     <DxButton Text="Smart Paste"
               IconUrl="@Icon.ClipboardPasteSparkle"
               RenderStyle="ButtonRenderStyle.Primary"
@@ -24,24 +27,20 @@
     [Parameter]
     public EventCallback<bool> IsProcessingChanged { get; set; }
 
+    [Parameter]
+    public string? ErrorMessage { get; set; }
+
+    [Parameter]
+    public EventCallback<string?> ErrorMessageChanged { get; set; }
+
     async Task SetIsProcessing(bool value) {
         IsProcessing = value;
         await IsProcessingChanged.InvokeAsync(value);
     }
 
-    static readonly Dictionary<string, string> FieldDescriptions = new()
-    {
-        { nameof(CustomAppointmentFormInfo.Subject), "Short appointment title." },
-        { nameof(CustomAppointmentFormInfo.Start), "Start date and time, (yyyy-MM-ddTHH:mm:ss)." },
-        { nameof(CustomAppointmentFormInfo.End), "End date and time, (yyyy-MM-ddTHH:mm:ss)." },
-        { nameof(CustomAppointmentFormInfo.Location), "Physical or virtual meeting location." },
-        { nameof(CustomAppointmentFormInfo.Description), "Summarized body of the appointment." }
-    };
-
-    protected override void OnInitialized() {
-        base.OnInitialized();
-        PromptAugmentation = "Always override the current field value with the extracted one. If a value cannot be determined, leave the field unchanged.";
-        ItemDescriptions = FieldDescriptions;
+    async Task SetErrorMessage(string? value) {
+        ErrorMessage = value;
+        await ErrorMessageChanged.InvokeAsync(value);
     }
 
     protected override object? GetDataObject() => AppointmentFormInfo;
@@ -97,23 +96,26 @@
         return false;
     }
 
-    protected override Task OnValuesApplied(IList<KeyValuePair<string, object?>> appliedValues) {
-        return SetIsProcessing(false);
-    }
-
     protected async Task OnSmartPasteClick() {
-        string? clipboardText = null;
+        string? clipboardText;
         try {
             clipboardText = await JS.InvokeAsync<string>("navigator.clipboard.readText");
         }
-        catch(Exception ex) {
-            throw new Exception(ex.Message);
+        catch(Exception) {
+            await SetErrorMessage("Clipboard access unavailable.");
+            return;
         }
 
         if(string.IsNullOrWhiteSpace(clipboardText)) return;
 
+        await SetErrorMessage(null);
         await SetIsProcessing(true);
-        await SmartPasteAsync(clipboardText);
+        try {
+            await SmartPasteAsync(clipboardText);
+        }
+        finally {
+            await SetIsProcessing(false);
+        }
     }
 
     static DateTime ToDateTime(object? value, DateTime fallback) =>
