@@ -4,7 +4,7 @@ Automatically generated badges
 
 # Blazor Scheduler — AI-powered Smart Paste
 
-This example adds an [AI-powered Smart Paste extension](https://docs.devexpress.com/Blazor/DevExpress.AIIntegration.Blazor.SmartPasteBase) to the DevExpress Blazor [Scheduler](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxScheduler) component. Appointment edit forms include Smart Paste buttons that simplify data entry when users copy appointment information from external sources. The Smart Paste extension parses the clipboard text to fill a new appointment with details (a subject, start and end time values, location, and description).
+This example adds an [AI-powered Smart Paste extension](https://docs.devexpress.com/Blazor/DevExpress.AIIntegration.Blazor.SmartPasteBase) to the DevExpress Blazor [Scheduler](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxScheduler) component. Appointment edit forms include Smart Paste buttons designed to simplify data entry when users copy appointment information from external sources. The Smart Paste extension parses clipboard text to populate a new appointment with relevant information (subject, start and end time values, location, and description).
 
 ![Scheduler Smart Paste](scheduler-smart-paste.png)
 
@@ -12,7 +12,7 @@ This example adds an [AI-powered Smart Paste extension](https://docs.devexpress.
 
 ### Configure Azure OpenAI and DevExpress AI Services
 
-1. The application uses the Azure OpenAI service as the AI provider. Configure the Azure OpenAI endpoint, API key, and deployment name in `appsettings.json`:
+1. The application uses Azure OpenAI for its AI provider. Configure the Azure OpenAI endpoint, API key, and deployment name in `appsettings.json`:
 
     ```json
     "AzureOpenAISettings": {
@@ -55,8 +55,8 @@ The [Scheduler.razor](./DxSchedulerSmartPaste/Components/Pages/Scheduler.razor) 
 
 * [Memo](#memo) - displays source text.
 * [Button](#button) - copies source text to the clipboard.
-* [Scheduler](#scheduler) - displays appointments. Compact and detailed edit forms include the Smart Paste button that extracts appointment details from source text.
-* [Loading Panel](#loading-panel) - displays a progress indicator during the Smart Paste operation.
+* [Scheduler](#scheduler) - displays appointments. Compact and detailed edit forms include a Smart Paste button that extracts appointment information from source text.
+* [Loading Panel](#loading-panel) - displays a progress indicator during Smart Paste operations.
 
 #### Memo
 
@@ -93,7 +93,7 @@ Place a [DxButton](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxButton
 #### Scheduler
 
 1. Place a [DxScheduler](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxScheduler) component on the page.
-2. Handle the `AppointmentFormShowing` event to get the `formInfo` object that contains the appointment data and references to the Scheduler data storage and instance.
+2. Handle the `AppointmentFormShowing` event to get the `formInfo` object with appointment data and references to the Scheduler data storage and instance.
 3. Use `AppointmentCompactFormLayout` and `AppointmentFormLayout` properties to customize appointment form layout (compact and detailed forms). Add the [SmartPasteComponent](#create-a-smart-paste-component) to the item list.
 
 ```Razor
@@ -197,7 +197,8 @@ The Smart Paste component sets the `IsProcessing` property to true before the Sm
 
 #### Add a Smart Paste Button and Handle Its Click
 
-The [SmartPasteComponent.razor](./DxSchedulerSmartPaste/Components/SmartPasteComponent.razor) page defines a component that inherits from [SmartPasteBase](https://docs.devexpress.com/Blazor/DevExpress.AIIntegration.Blazor.SmartPasteBase). The component displays a Smart Paste button that calls the `OnSmartPasteClick` method on click. This method reads the clipboard text and passes it to the [SmartPasteAsync](https://docs.devexpress.com/Blazor/DevExpress.AIIntegration.Blazor.SmartPasteBase.SmartPasteAsync(System.String)) method. The component also displays an error message if the Smart Paste operation fails.
+The [SmartPasteComponent.razor](./DxSchedulerSmartPaste/Components/SmartPasteComponent.razor) page defines a component inherited from [SmartPasteBase](https://docs.devexpress.com/Blazor/DevExpress.AIIntegration.Blazor.SmartPasteBase). The component displays a Smart Paste button designed to call the `OnSmartPasteClick` method on click. This method reads clipboard text and passes it to the [SmartPasteAsync](https://docs.devexpress.com/Blazor/DevExpress.AIIntegration.Blazor.SmartPasteBase.SmartPasteAsync(System.String)) method. The component also displays an error message if Smart Paste-related operations fail.
+
 
 ```Razor
 <div id="smart-paste">
@@ -263,7 +264,7 @@ The [SmartPasteComponent.razor](./DxSchedulerSmartPaste/Components/SmartPasteCom
 
 #### Define Appointment Fields for AI Extraction
 
-Override `GetSmartPasteFieldInfos` to specify appointment fields that the Smart Paste extension should extract. `GetSmartPasteFieldInfos` returns a collection of `SmartPasteFieldInfo` objects that define the field name, type, and current value for each appointment property:
+Override `GetSmartPasteFieldInfos` to specify appointment fields the Smart Paste extension must extract. `GetSmartPasteFieldInfos` returns a collection of `SmartPasteFieldInfo` objects that define field name, type, and current value for each appointment property:
 
 ```csharp
 protected override IEnumerable<SmartPasteFieldInfo> GetSmartPasteFieldInfos(object data) {
