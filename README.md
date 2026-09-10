@@ -361,8 +361,8 @@ protected async Task OnSmartPasteClick() {
 
 ## Documentation
 
-[DevExpress Blazor Scheduler](https://docs.devexpress.com/Blazor/401179/components/scheduler)
-[AI-powered Smart Paste for Form Layout](https://docs.devexpress.com/Blazor/406030/ai-powered-extensions/ai-powered-smart-paste-for-form-layout)
+* [DevExpress Blazor Scheduler](https://docs.devexpress.com/Blazor/401179/components/scheduler)
+* [AI-powered Smart Paste for Form Layout](https://docs.devexpress.com/Blazor/406030/ai-powered-extensions/ai-powered-smart-paste-for-form-layout)
 
 
 <!-- feedback -->
