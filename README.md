@@ -1,5 +1,4 @@
 <!-- default badges list -->
-Automatically generated badges
 <!-- default badges end -->
 
 # Blazor Scheduler — AI-powered Smart Paste
@@ -366,5 +365,4 @@ protected async Task OnSmartPasteClick() {
 
 
 <!-- feedback -->
-Automatically generated and maintained feeback block
 <!-- feedback end -->
