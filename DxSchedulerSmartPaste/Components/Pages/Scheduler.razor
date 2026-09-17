@@ -90,7 +90,7 @@
     string ErrorMessage { get; set; } = string.Empty;
 
     string SourceText { get; set; } =
-        "Hi,\n\nI'm confirming our Q4 Strategy Review on July 28, 2026. We will discuss about the proposed strategy points shared by our executives yesterday. We'll meet from 2:00 PM to 3:30 PM in Building 4, Room 204.\n\nThanks,\nJohn";
+        "Hi,\nI confirm our Q4 Strategy Review on July 28, 2026.\nDuring the meeting, we will discuss the strategy proposals shared in yesterday's email.\nWe will meet from 2:00 PM to 3:30 PM in Building 4, Room 204.\n\nThanks,\nJohn";
 
     async Task OnCopyToClipboardClick() {
         await JS.InvokeVoidAsync("navigator.clipboard.writeText", SourceText);
